@@ -1,0 +1,5 @@
+
+[Default Applications]
+text/html=open-url.desktop
+x-maemo-urischeme/http=open-url.desktop
+x-maemo-urischeme/https=open-url.desktop

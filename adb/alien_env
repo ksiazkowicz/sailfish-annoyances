@@ -1,0 +1,90 @@
+#!/bin/bash
+# Copyright 2010-2016 Myriad Group AG. All Rights Reserved.
+#
+# Start Alien
+
+# Run platform specific env setup script if exists
+SCRIPT_DIR=/system/script
+if [ -e $SCRIPT_DIR/platform_envsetup.sh ]; then
+    source $SCRIPT_DIR/platform_envsetup.sh
+fi
+
+if [ -e $SCRIPT_DIR/platform_extraenvsetup.sh ]; then
+  source $SCRIPT_DIR/platform_extraenvsetup.sh
+fi
+
+export ANDROID_ROOT=/system
+export ANDROID_DATA=/data
+
+if [ "$ANDROID_ROOT" == "" ] ||
+    [ "$ANDROID_DATA" == "" ]; then
+    echo "The following environment variables MUST be set!"
+    echo "- ANDROID_ROOT"
+    echo "- ANDROID_DATA"
+    exit
+fi
+
+if [ "$ANDROID_ASHMEM_DIR" == "" ]; then
+    export ANDROID_ASHMEM_DIR=$ANDROID_DATA/ashmem
+fi
+if [ "$ANDROID_SOCKET_DIR" == "" ]; then
+    export ANDROID_SOCKET_DIR=$ANDROID_DATA/socket
+fi
+if [ "$EXTERNAL_STORAGE" == "" ]; then
+    ANDROID_SDCARD=$ANDROID_DATA/sdcard
+    export EXTERNAL_STORAGE=$ANDROID_SDCARD
+fi
+if [ "$MEDIA_STORAGE" == "" ]; then
+    export MEDIA_STORAGE=$ANDROID_DATA/media
+fi
+if [ "$DOWNLOAD_CACHE" == "" ]; then
+    export DOWNLOAD_CACHE=$ANDROID_DATA/cache
+fi
+
+export ANDROID_STORAGE=/storage
+
+ALIEN_DIRS="
+    $ANDROID_DATA
+    $ANDROID_DATA/dalvik-cache
+    $ANDROID_DATA/app-private
+    $ANDROID_DATA/app
+    $ANDROID_DATA/data
+    $ANDROID_DATA/misc
+    $ANDROID_DATA/property
+    $ANDROID_SOCKET_DIR
+    $ANDROID_ASHMEM_DIR
+    $MEDIA_STORAGE
+    $EXTERNAL_STORAGE
+    $DOWNLOAD_CACHE
+    $ALIEN_KEYSTORE
+    "
+# check if all alien directories in place and create them if not
+for x in $ALIEN_DIRS; do
+    if [ -d $x ];
+    then
+        echo "$x exists already";
+    else
+        mkdir -p $x;
+        chmod +rw $x;
+        echo "created $x";
+    fi;
+done
+
+export PATH=$ANDROID_ROOT/vendor/bin:$ANDROID_ROOT/sbin:$ANDROID_ROOT/bin:$ANDROID_ROOT/xbin:$PATH
+
+FRAMEWORK=$ANDROID_ROOT/framework
+export BOOTCLASSPATH=$FRAMEWORK/core.jar:$FRAMEWORK/conscrypt.jar:$FRAMEWORK/okhttp.jar:$FRAMEWORK/core-junit.jar:$FRAMEWORK/bouncycastle.jar:$FRAMEWORK/ext.jar:$FRAMEWORK/framework.jar:$FRAMEWORK/framework2.jar:$FRAMEWORK/telephony-common.jar:$FRAMEWORK/voip-common.jar:$FRAMEWORK/mms-common.jar:$FRAMEWORK/android.policy.jar:$FRAMEWORK/services.jar:$FRAMEWORK/apache-xml.jar:$FRAMEWORK/webviewchromium.jar
+
+echo "-------------------------------------------"
+echo "ANDROID_ROOT=$ANDROID_ROOT"
+echo "ANDROID_DATA=$ANDROID_DATA"
+echo "DOWNLOAD_CACHE=$DOWNLOAD_CACHE"
+echo "ANDROID_ASHMEM_DIR=$ANDROID_ASHMEM_DIR"
+echo "EXTERNAL_STORAGE=$EXTERNAL_STORAGE"
+echo "BOOTCLASSPATH=$BOOTCLASSPATH"
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+echo "ANDROID_LOG_TAGS=$ANDROID_LOG_TAGS"
+echo "USER_APP=$USER_APP"
+echo "-------------------------------------------"
+
+
